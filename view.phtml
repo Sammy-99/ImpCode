@@ -91,7 +91,7 @@ $categories = $categoryHelper->getStoreCategories();
                                 <ol class="items">
                                 <?php foreach ($categories as $category) : ?>
                                     <li class="item subCatPrefix">
-                                        <?php if($category->getChildrenCount() > 0) : ?> + &nbsp; <?php endif; ?>
+                                        <?php if($category->getChildrenCount() > 0) : ?><span> + </span> &nbsp; <?php endif; ?>
                                         <a href="<?=$baseUrl.$category->getRequestPath() ; ?>"><?=$category->getName()?></a>
                                         <div class="all_child_categories hide-children">
                                             <ol class="childrennn">
@@ -159,11 +159,28 @@ $categories = $categoryHelper->getStoreCategories();
                 //     $(this).children().show();
                 // });
 
-                $(function(){
-                    $(".subCatPrefix").on("click", function(){
-                    $(this).find("div").toggleClass("hide-children");
-                })
-                })
+               
+                // $(".subCatPrefix").on("click", function(){
+                //     $(this).find("div").toggleClass("hide-children");
+                // });
+
+                
+
+                $(".subCatPrefix span").on("click", function(){
+                    cl = console.log.bind(document);
+                    // cl('out');
+                    $(this).siblings("div").toggleClass("hide-children");
+
+                    var nowText = $(this).text();
+                    // $(this).text('-');
+
+                    if($.trim(nowText) == '+'){
+                        $(this).text('-');
+                    }else if ($.trim(nowText) == '-'){
+                        $(this).text('+');
+                    }
+                    // alert("'"+$.trim($(this).text()) + "' & '" + "+'");
+                });
 
                
 
