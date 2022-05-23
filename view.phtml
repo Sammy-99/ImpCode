@@ -1,0 +1,223 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+<?php
+/**
+ * Category layered navigation
+ *
+ * @var $block \Magento\LayeredNavigation\Block\Navigation
+ */
+?>
+<style>
+    .filtered-product-brand li
+    { 
+        display:none;
+    }
+    #loadMore 
+    {
+        cursor:pointer;
+    }
+    .hide-children
+    {
+        display: none;
+    }
+    .subCatPrefix
+    {
+        cursor:pointer;
+    }
+</style>
+
+<?php
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager = $objectManager->Create('\Magento\Store\Model\StoreManagerInterface');  
+$baseUrl = $storeManager->getStore()->getBaseUrl();  
+$categoryHelper = $objectManager->Create('\Magento\Catalog\Helper\Category');
+$categories = $categoryHelper->getStoreCategories();
+// echo "<pre>";
+
+//    foreach($categories as $cat){
+//     // print_r($cat->getData());
+//     //    echo $cat->getId().'--'.$cat->getName();echo '<br>';
+//        $subCatObj = $objectManager->create('\Magento\Catalog\Model\CategoryRepository');
+//        $subcategories = $subCatObj->get($cat->getId())->getChildrenCategories();
+//             foreach($subcategories as $subcategorie) {
+//                 print_r($subcategorie->getData());
+//                 // echo '    -------> '.$subcategorie->getId()."-----".$subcategorie->getName().'<br/>';
+//             }
+       
+
+//    }
+
+
+//    die(" pppppppll");
+
+
+
+
+?>
+
+<?php if ($block->canShowBlock()) : ?>
+    <div class="block filter">
+        <div class="block-title filter-title">
+            <strong><?= $block->escapeHtml(__('Shop By')) ?></strong>
+        </div>
+
+        <div class="block-content filter-content">
+            <?= $block->getChildHtml('state') ?>
+
+            <?php /*if ($block->getLayer()->getState()->getFilters()) : ?>
+                <div class="block-actions filter-actions">
+                    <a href="<?= $block->escapeUrl($block->getClearUrl()) ?>" class="action clear filter-clear"><span><?= $block->escapeHtml(__('Clear Filter')) ?></span></a>
+                </div>
+            <?php endif;*/ ?>
+            <?php $wrapOptions = false; ?>
+            <?php $i = 1 ; ?>
+            <?php foreach ($block->getFilters() as $filter) : ?>
+               
+                <?php if (!$wrapOptions) : ?>
+                    <strong role="heading" aria-level="2" class="block-subtitle filter-subtitle"><?= $block->escapeHtml(__('Shopping Options')) ?></strong>
+                    <dl class="filter-options" id="narrow-by-list">
+                    <?php $wrapOptions = true;
+                endif; ?>
+                <?php if ($filter->getItemsCount()) : ?>
+                    <?php if ($i == 1) : ?>
+                        <dt role="heading" aria-level="3" class="filter-options-title"><?= $block->escapeHtml(__($filter->getName() )) ?></dt>
+                        <dd class="filter-options-content" >
+                            <div class="all_head_categories">
+                                <ol class="items">
+                                <?php foreach ($categories as $category) : ?>
+                                    <li class="item subCatPrefix">
+                                        <?php if($category->getChildrenCount() > 0) : ?> + &nbsp; <?php endif; ?>
+                                        <a href="<?=$baseUrl.$category->getRequestPath() ; ?>"><?=$category->getName()?></a>
+                                        <div class="all_child_categories hide-children">
+                                            <ol class="childrennn">
+                                            <?php $subCatObj = $objectManager->create('\Magento\Catalog\Model\CategoryRepository'); ?>
+                                            <?php $subCategories = $subCatObj->get($category->getId())->getChildrenCategories(); ?>
+                                            <?php foreach ($subCategories as $subCategory) : ?>
+                                                <li style="list-style: none">
+                                                    <a href="<?=$baseUrl.$subCategory->getRequestPath() ; ?>"><?=$subCategory->getName()?></a>
+                                                </li>
+                                            <?php endforeach; ?>
+                                            </ol>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                                </ol>
+                            </div>
+                        </dd>
+                    <?php else: ?>
+                        <dt role="heading" aria-level="3" class="filter-options-title"><?= $block->escapeHtml(__($filter->getName() )) ?></dt>
+                        <?php if ($filter->getName() == 'Brands') : ?>
+                            <input type="text" id="search_product_brand" placeholder="Search Brand">
+                            <div id="product_brand_lists"></div>
+                        <?php endif; ?>
+
+                        <dd class="filter-options-content" >
+                            <?php if ($filter->getName() == 'Brands') : ?>
+                                <div class="filtered-product-brand">
+                                    <?= /* @noEscape */ $block->getChildBlock('renderer')->render($filter) ?>
+                                </div>
+                                <div id="loadMore">See More</div>
+                            <?php else : ?>
+                                    <?= /* @noEscape */ $block->getChildBlock('renderer')->render($filter) ?>
+                            <?php endif; ?>
+                        </dd>
+                    <?php endif; ?>  
+                    
+                <?php endif; ?>
+                <?php $i++; ?>
+            <?php endforeach; ?>
+            <?php if ($wrapOptions) : ?>
+                </dl>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+
+
+
+<script>
+    require(
+            ['jquery'],
+            function ($) {
+
+                // $(".subCatPrefix").on("click", function(){
+                //     // alert($(this).text());
+                //     // $('.active').click(function () {
+                //         $('.all_child_categories').toggleClass("hidden"); 
+                //     // });
+                // })
+
+                // $(".subCatPrefix").toggle(function () {
+                //     $(this).children().hide();
+                // }, function () {
+                //     $(this).children().show();
+                // });
+
+                $(function(){
+                    $(".subCatPrefix").on("click", function(){
+                    $(this).find("div").toggleClass("hide-children");
+                })
+                })
+
+               
+
+
+
+                $(".filtered-product-brand ol li").addClass('filter_product_brand');
+                
+                    size_li = $(".filtered-product-brand li").size();                                                                                 
+                    x=3;
+                    $(".filtered-product-brand li:lt(3)").show();
+                    $('#loadMore').click(function () {
+                        x= (x+5 <= size_li) ? x+5 : size_li;
+                        $('.filtered-product-brand li:lt('+x+')').show();
+                        // $('#showLess').show();
+                        if(x == size_li){
+                            $('#loadMore').hide();
+                        }
+                    });
+
+                    // $('#showLess').click(function () {
+                    //     x=(x-5<0) ? 3 : x-5;
+                    //     $('.filtered-product-brand li').not(':lt('+x+')').hide();
+                    //     $('#loadMore').show();
+                    //     $('#showLess').show();
+                    //     if(x == 3){
+                    //         $('#showLess').hide();
+                    //     }
+                    // });
+
+
+                $("#search_product_brand").on('keyup', function(event) {
+                    
+                    var search = $(this).val().toLowerCase();
+
+                    $(".filter_product_brand").each(function(event) {
+                        var brand_name = $(this).find('a').clone().children().remove().end().text();
+
+                        if (brand_name.toLowerCase().indexOf(search) != -1) {
+                            $(this).show();
+                        }
+                        else {
+                            $(this).hide();  
+                        }
+                
+                    });
+
+                    if($(this).val() == '' || $(this).val() == null){
+                        $("#loadMore").hide();
+                    }
+                    
+                });
+
+              
+            }
+    );
+
+</script>
